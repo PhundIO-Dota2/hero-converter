@@ -1,10 +1,14 @@
 {-# LANGUAGE
-    OverloadedStrings
+    OverloadedLists,
+    OverloadedStrings,
+    RecordWildCards,
+    TypeApplications
     #-}
 -- | Contains the various names and IDs of the game's default heroes.
 module Dota.Hero.Name where
 
-import Data.Set (Set, fromList)
+import Data.Set (Set)
+import qualified Data.Set as S
 
 import Data.Function
 import Data.Maybe
@@ -29,8 +33,8 @@ hnID hn = bool "npc_dota_hero_" "npc_dota_custom_hero_" (hnCustom hn) ++ _hnID h
 
 -- | A hero's primary name (the name by which they're usually referred to)
 hnPrimaryName :: HeroName -> String
-hnPrimaryName hn = case hnNameStrategy of
-    UseTitle -> nameBase $ hnTitle hn
+hnPrimaryName hn = case hnNameStrategy hn of
+    UseTitle -> titleBase $ hnTitle hn
     UseName -> hnName hn
     Other n -> n
 
@@ -62,7 +66,7 @@ readUsing sn str = HN False sn iid name title
 instance Eq HeroName where (==) = (==) `on` _hnID
 instance Ord HeroName where compare = compare `on` _hnID
 instance Show HeroName where
-    show hn = concat [
+    show hn = concat ([
         case hnNameStrategy hn of
             UseName -> hnName hn
             UseTitle -> titleBase $ hnTitle hn
@@ -72,7 +76,7 @@ instance Show HeroName where
         if noTitle == hnTitle hn then "" else ", " ++ show (hnTitle hn),
         " (",
         hnID hn,
-        ")"]
+        ")"] ::[String]) -- GHC apparently doesn't default this to [] in the presence of OverloadedLists
 
 data StandardName = UseTitle | UseName | Other !String deriving (Eq, Ord, Show)
 
@@ -103,17 +107,22 @@ noTitle :: Title
 noTitle = Title False ""
 
 findHeroName :: String -> Set HeroName -> Maybe HeroName
-findHeroName needle = snd . S.foldr ((maxOn fst) . (\x -> (scoreMatch x, x))) (minBound, Nothing)
+findHeroName needle hay = snd . S.foldr ((maxOn fst) . (\x -> (scoreMatch x, Just x))) (0, Nothing) $ hay
   where
-    scoreMatch hn@HN{..} = if name ~= needle || hnName ~= needle || fullName ~= needle || 
+    scoreMatch :: HeroName -> Int
+    scoreMatch hn@HN{..} = if name ~= needle || hnName ~= needle || fullName ~= needle || show hnTitle ~= needle || _hnID ~= needle
         then maxBound
-        else if 
-      name = hnPrimaryName hn
-      fullName = hnFullName hn
+        else 0 -- TODO put an actual algorithm here
+      where
+        name = hnPrimaryName hn
+        fullName = hnFullName hn
     maxOn f a b = if f a <= f b then b else a
+    x ~= y = canon x == canon y
+    canon = stripPrefix' "the" . map toLower . filter isLetter
+    stripPrefix' p s = case stripPrefix p s of Nothing -> s; Just s' -> s'
 
 defaultHeroes :: Set HeroName
-defaultHeroes = fromList [
+defaultHeroes = [
     n "Abaddon, the Lord of Avernus",
     t "Razzil Darkbrew, the Alchemist",
     HN False UseName "antimage" "Anti-Mage" "",

@@ -18,11 +18,13 @@ library
   exposed-modules:     Dota.Hero
                      , Dota.Ability
                      , Dota.Hero.Name
+                     , Dota.Hero.Format.Native
   build-depends:       base >= 4.7 && < 5
                      , microlens
                      , microlens-th
                      , containers
                      , vector
+                     , binary
   default-language:    Haskell2010
 
 test-suite hero-converter-test

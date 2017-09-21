@@ -10,6 +10,10 @@ import Lens.Micro.TH
 import Data.Vector (Vector)
 import qualified Data.Vector as V
 
+import Data.Binary
+
+import Data.Monoid
+
 import Dota.Ability
 
 -- An attribute's base value and growth per level
@@ -23,6 +27,7 @@ data AttackCapability = None | Ranged | Melee deriving (Eq, Ord, Enum, Bounded, 
 data Attribute = Strength | Agility | Intelligence deriving (Eq, Ord, Enum, Bounded, Show)
 
 data Hero = Hero {
+    _heroPrimaryAtttribute :: Attribute,
     _heroStrength :: GrowingAttribute,
     _heroAgility :: GrowingAttribute,
     _heroIntelligence :: GrowingAttribute,
@@ -31,7 +36,8 @@ data Hero = Hero {
     _heroAttackProjectileSpeed :: Int,
     _heroAttackTime :: Double,
     _heroAttackBaseDamage :: (Int, Int),
-    _heroAbilities :: Vector Ability
+    _heroAbilities :: Vector Ability,
+    _heroTalents :: Talents
     } deriving (Eq, Ord, Show)
 makeLenses ''Hero
 
