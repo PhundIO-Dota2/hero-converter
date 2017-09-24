@@ -21,3 +21,4 @@ cabal.project.local
 *.iml
 .idea/
 out/
+cabal.config
