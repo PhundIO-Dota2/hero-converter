@@ -2,7 +2,7 @@
     RecordWildCards,
     BangPatterns
     #-}
-module Dota.Hero.Format.Native where
+module Dota.Hero.Format.Binary where
 
 import Lens.Micro
 

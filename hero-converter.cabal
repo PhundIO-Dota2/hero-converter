@@ -18,7 +18,7 @@ library
   exposed-modules:     Dota.Hero
                      , Dota.Ability
                      , Dota.Hero.Name
-                     , Dota.Hero.Format.Native
+                     , Dota.Hero.Format.Binary
   build-depends:       base >= 4.7 && < 5
                      , microlens
                      , microlens-th
